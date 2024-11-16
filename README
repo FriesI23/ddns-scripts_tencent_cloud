@@ -1,22 +1,3 @@
-<!--
- Copyright (C) 2024 FriesI23
-
- This file is part of ddns-scripts_tencent_cloud.
-
- ddns-scripts_tencent_cloud is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 2 of the License, or
- (at your option) any later version.
-
- ddns-scripts_tencent_cloud is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with ddns-scripts_tencent_cloud.  If not, see <https://www.gnu.org/licenses/>.
--->
-
 # Openwrt DDNS Script: 腾讯云 Tencent Cloud (原 DNSPod)
 
 使用最新的腾讯云 APIv3 实现 (Dnspod API 已经不再维护并且不知道什么时候会下线),
