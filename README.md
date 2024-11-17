@@ -12,12 +12,19 @@
 
 - 下载 `Openwrt` 源码并编译
 - 执行 `make menuconfig` 并选择该 package
-- 执行 `make package/ddns-scripts_tencent_cloud/compile V=99`.
+- 编译工具链 `make -j$(nproc) toolchain/install`
+- 编译包 `make -j$(nproc) package/ddns-scripts_tencent_cloud/compile`.
 
-或直接将文件复制到目录:
+或直接下载安装:
 
-1. `cp update_tencent_cloud_com.sh /usr/lib/ddns/update_tencent_cloud_com.sh`
-2. `cp tencent-cloud.com.json /usr/share/ddns/default/tencent-cloud.com.json`
+[ddns-scripts*tencent_cloud*\<version\>\_all.ipk](https://github.com/FriesI23/ddns-scripts_tencent_cloud/releases/latest)
+
+或将文件复制到目录:
+
+```shell
+cp update_tencent_cloud_com.sh /usr/lib/ddns/update_tencent_cloud_com.sh
+cp tencent-cloud.com.json /usr/share/ddns/default/tencent-cloud.com.json
+```
 
 ## 使用方法
 
