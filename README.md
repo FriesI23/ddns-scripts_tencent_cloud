@@ -22,6 +22,10 @@
 或将文件复制到目录:
 
 ```shell
+# install dependencies
+opkg update
+opkg install ddns-scripts curl openssl-util
+# copy script and config file
 cp update_tencent_cloud_com.sh /usr/lib/ddns/update_tencent_cloud_com.sh
 cp tencent-cloud.com.json /usr/share/ddns/default/tencent-cloud.com.json
 ```

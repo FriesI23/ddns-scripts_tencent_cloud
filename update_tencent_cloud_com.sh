@@ -36,10 +36,13 @@
 # variable __IP already defined with the ip-address to use for update
 #
 
+local OPENSSL=$(command -v openssl)
+
 # check parameters
 [ -z "$username" ] && write_log 14 "Service section not configured correctly! Missing key as 'username'"
 [ -z "$password" ] && write_log 14 "Service section not configured correctly! Missing secret as 'password'"
 [ -z "$CURL_SSL" ] && write_log 13 "Dnspod communication require cURL with SSL support. Please install"
+[ -z "$OPENSSL" ] && write_log 13 "Dnspod communication require openssl. Please install"
 [ $use_https -eq 0 ] && use_https=1
 
 # variables
@@ -179,7 +182,7 @@ x-tc-action:$(echo $__ACTION | awk '{print tolower($0)}')
 EOF
     )
     local __SIGNED_HEADERS="content-type;host;x-tc-action"
-    local __HASHED_REQUEST_PAYLOAD=$(echo -n "$__PAYLOAD" | openssl sha256 -hex | awk '{print $2}')
+    local __HASHED_REQUEST_PAYLOAD=$(echo -n "$__PAYLOAD" | $OPENSSL sha256 -hex | awk '{print $2}')
     local __CANONICAL_REQEUST=$(
         cat <<EOF
 $__METHOD
@@ -195,7 +198,7 @@ EOF
     # 步骤 2：拼接待签名字符串
     local __CREDENTIAL_SCOPE="$__DATE/$__SERVICE/tc3_request"
     local __HASHED_CANONICAL_REQUEST=$(printf "$__CANONICAL_REQEUST" |
-        openssl sha256 -hex | awk '{print $2}')
+        $OPENSSL sha256 -hex | awk '{print $2}')
     local __STRING_TO_SIGN=$(
         cat <<EOF
 $__ALGORITHM
@@ -207,13 +210,13 @@ EOF
 
     # 步骤 3：计算签名
     local __SECRET_DATE=$(printf "$__DATE" |
-        openssl sha256 -hmac "TC3$__SECRET_KEY" | awk '{print $2}')
+        $OPENSSL sha256 -hmac "TC3$__SECRET_KEY" | awk '{print $2}')
     local __SECRET_SERVICE=$(printf $__SERVICE |
-        openssl dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_DATE" | awk '{print $2}')
+        $OPENSSL dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_DATE" | awk '{print $2}')
     local __SECRET_SIGNING=$(printf "tc3_request" |
-        openssl dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_SERVICE" | awk '{print $2}')
+        $OPENSSL dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_SERVICE" | awk '{print $2}')
     local __SIGNATURE=$(printf "$__STRING_TO_SIGN" |
-        openssl dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_SIGNING" | awk '{print $2}')
+        $OPENSSL dgst -sha256 -mac hmac -macopt hexkey:"$__SECRET_SIGNING" | awk '{print $2}')
 
     # 步骤 4：拼接 Authorization
     local __AUTHORIZATION="$__ALGORITHM Credential=$__SECRET_ID/$__CREDENTIAL_SCOPE, \
