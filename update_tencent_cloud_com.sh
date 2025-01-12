@@ -301,7 +301,7 @@ if [ -n "$record_id" ]; then
 	__RECID="$record_id"
 else
 	# read record id for A or AAAA record of host.domain.TLD
-	__RUNPROG="$__PRGBASE $(build_describe_record_list_request_param)"
+	__RUNPROG="$__PRGBASE \$(build_describe_record_list_request_param)"
 	# extract zone id
 	tencentcloud_transfer || return 1
 	__RECID=$(grep -o '"RecordId":[[:space:]]*[0-9]*' $DATFILE | grep -o '[0-9]*' | head -1)
@@ -338,11 +338,11 @@ __DATA=$(grep -o '"Value":\s*"[^"]*' $DATFILE | grep -o '[^"]*$' | head -1)
 
 if [ -z "$__RECID" ]; then
 	# create new record if record id not found
-	__RUNPROG="$__PRGBASE $(build_create_record_request_param $__IP $__RECLINE)"
+	__RUNPROG="$__PRGBASE \$(build_create_record_request_param \$__IP \$__RECLINE)"
 	tencentcloud_transfer || return 1
 	return 0
 fi
 
-__RUNPROG="$__PRGBASE $(build_modify_record_request_param $__IP $__RECLINE $__RECID)"
+__RUNPROG="$__PRGBASE \$(build_modify_record_request_param \$__IP \$__RECLINE \$__RECID)"
 tencentcloud_transfer || return 1
 return
