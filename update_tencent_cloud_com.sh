@@ -7,7 +7,7 @@
 #	- at: net/ddns-scripts/files/usr/lib/ddns/update_cloudflare_com_v4.sh
 # - github.com/nixonli/ddns-scripts_dnspod for "update_dnspod_cn.sh"
 #
-# v1.2.0: Remove retry logic(Already implemented in dynamic_dns_updater.sh)
+# v1.2.0: Migrate retry_count to retry_max_count
 # v1.1.0: Publish script
 #
 # 2024 FriesI23 <FriesI23@outlook.com>
@@ -44,6 +44,7 @@ local __URLHOST="dnspod.tencentcloudapi.com"
 local __URLBASE="https://$__URLHOST"
 local __METHOD="POST"
 local __CONTENT_TYPE="application/json"
+local __RETRY_COUNT=${retry_count:-$retry_max_count}
 
 # split __HOST __DOMAIN from $domain
 # given data:
@@ -56,22 +57,45 @@ __DOMAIN=$(printf %s "$domain" | cut -d@ -f2)
 [ $use_ipv6 -eq 0 ] && __TYPE="A" || __TYPE="AAAA"
 
 tencentcloud_transfer() {
+	local __CNT=0
 	local __ERR __CODE
 
-	write_log 7 "#> $__RUNPROG"
-	eval "$__RUNPROG"
-	__ERR=$? # save communication error
+	while :; do
+		write_log 7 "#> $__RUNPROG"
+		eval "$__RUNPROG"
+		__ERR=$? # save communication error
 
-	if [ $__ERR -ne 0 ]; then
-		write_log 3 "cURL Error: '$__ERR'"
-	fi
-
-	if grep -q '"Error"' "$DATFILE"; then
-		__CODE=$(grep -o '"Code":\s*"[^"]*' "$DATFILE" | grep -o '[^"]*$' | head -1)
-		if [[ $__CODE != "ResourceNotFound.NoDataOfRecord" ]]; then
-			write_log 3 "cURL Response Error: '$__CODE'"
+		if [ $__ERR -eq 0 ]; then
+			if grep -q '"Error"' "$DATFILE"; then
+				__CODE=$(grep -o '"Code":\s*"[^"]*' $DATFILE | grep -o '[^"]*$' | head -1)
+				[[ $__CODE == "ResourceNotFound.NoDataOfRecord" ]] && break
+				write_log 3 "cURL Response Error: '$__CODE'"
+				write_log 7 "$(cat $DATFILE)" # report error
+			else
+				break
+			fi
+		else
+			write_log 3 "cURL Error: '$__ERR'"
+			write_log 7 "$(cat $ERRFILE)" # report error
 		fi
-	fi
+
+		[ $VERBOSE -gt 1 ] && {
+			# VERBOSE > 1 then NO retry
+			write_log 4 "Transfer failed - Verbose Mode: $VERBOSE - NO retry on error"
+			break
+		}
+
+		__CNT=$(($__CNT + 1)) # increment error counter
+		# if error count > __RETRY_COUNT leave here
+		[ $__RETRY_COUNT -gt 0 -a $__CNT -gt $__RETRY_COUNT ] &&
+			write_log 14 "Transfer failed after $__RETRY_COUNT retries"
+
+		write_log 4 "Transfer failed - retry $__CNT/$__RETRY_COUNT in $RETRY_SECONDS seconds"
+		sleep $RETRY_SECONDS &
+		PID_SLEEP=$!
+		wait $PID_SLEEP # enable trap-handler
+		PID_SLEEP=0
+	done
 
 	# check for error
 	if grep -q '"Error":' $DATFILE; then
