@@ -7,8 +7,8 @@
 #	- at: net/ddns-scripts/files/usr/lib/ddns/update_cloudflare_com_v4.sh
 # - github.com/nixonli/ddns-scripts_dnspod for "update_dnspod_cn.sh"
 #
-# v1.1: Remove retry logic (Already been implemented in dynamic_dns_updater.sh)
-# v1.0: Publish script
+# v1.2.0: Remove retry logic(Already implemented in dynamic_dns_updater.sh)
+# v1.1.0: Publish script
 #
 # 2024 FriesI23 <FriesI23@outlook.com>
 #
