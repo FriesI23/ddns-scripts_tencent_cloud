@@ -1,9 +1,9 @@
 {
-    "name": "tencent-cloud.com",
-    "ipv4": {
-        "url": "update_tencent_cloud_com.sh"
-    },
-    "ipv6": {
-        "url": "update_tencent_cloud_com.sh"
-    }
+	"name": "tencent-cloud.com",
+	"ipv4": {
+		"url": "update_tencent_cloud_com.sh"
+	},
+	"ipv6": {
+		"url": "update_tencent_cloud_com.sh"
+	}
 }
